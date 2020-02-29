@@ -1,0 +1,4 @@
+{
+    "comments": false,
+    "ignore": ["**/*.test.js"]
+}
