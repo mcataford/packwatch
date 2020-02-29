@@ -3,10 +3,10 @@
 const { existsSync } = require('fs')
 
 const {
-    DIGEST_FILENAME,
+    MANIFEST_FILENAME,
     getCurrentPackageStats,
     getPreviousPackageStats,
-    createOrUpdateDigest,
+    createOrUpdateManifest,
 } = require('./helpers')
 
 if (!existsSync('package.json')) {
@@ -16,19 +16,19 @@ if (!existsSync('package.json')) {
     process.exit(1)
 }
 
-const isUpdatingDigest = process.argv.includes('--update-digest')
+const isUpdatingManifest = process.argv.includes('--update-manifest')
 
 const currentStats = getCurrentPackageStats()
 
 /*
- * If there is no digest file yet, we can use the current package stats as
+ * If there is no manifest file yet, we can use the current package stats as
  * a base to build one. The current package size becomes the limit.
  */
 
-if (!existsSync(DIGEST_FILENAME)) {
-    createOrUpdateDigest({ current: currentStats })
+if (!existsSync(MANIFEST_FILENAME)) {
+    createOrUpdateManifest({ current: currentStats })
     console.log(
-        `📝 No digest to compare against! Current package stats written to ${DIGEST_FILENAME}!`,
+        `📝 No Manifest to compare against! Current package stats written to ${MANIFEST_FILENAME}!`,
     )
     console.log(
         `Package size (${currentStats.packageSize}) adopted as new limit.`,
@@ -47,38 +47,38 @@ const {
 const hasExceededLimit = packageSizeBytes > limitBytes
 
 /*
- * If we are updating the digest, we can write right away and terminate.
+ * If we are updating the manifest, we can write right away and terminate.
  */
 
-if (isUpdatingDigest) {
-    createOrUpdateDigest({
+if (isUpdatingManifest) {
+    createOrUpdateManifest({
         previous: previousStats,
         current: currentStats,
         updateLimit: true,
     })
     console.log(
-        `📝 Updated the digest! Package size: ${packageSize}, Limit: ${packageSize}`,
+        `📝 Updated the manifest! Package size: ${packageSize}, Limit: ${packageSize}`,
     )
     process.exit(0)
 }
 
 /*
- * If there is a digest file and the current package busts its limit
+ * If there is a manifest file and the current package busts its limit
  * we signal it and terminate with an error.
  */
 
 if (hasExceededLimit) {
     console.log(
-        `🔥🔥📦🔥🔥 Your package exceeds the limit set in ${DIGEST_FILENAME}! ${packageSize} > ${limit}`,
+        `🔥🔥📦🔥🔥 Your package exceeds the limit set in ${MANIFEST_FILENAME}! ${packageSize} > ${limit}`,
     )
     console.log(
-        'Either update the limit by using the --update-digest flag or trim down your packed files!',
+        'Either update the limit by using the --update-manifest flag or trim down your packed files!',
     )
     process.exit(1)
 }
 
 /*
- * If there is a digest file and the limit is not busted, we give
+ * If there is a manifest file and the limit is not busted, we give
  * the user some feedback on how the current package compares with
  * the previous one.
  */

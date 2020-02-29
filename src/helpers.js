@@ -5,7 +5,7 @@ const PACKAGE_SIZE_PATT = /package size:\s+([0-9]+\.?[0-9]*\s+[A-Za-z]+)/g
 const UNPACKED_SIZE_PATT = /unpacked size:\s+([0-9]+\.?[0-9]*\s+[A-Za-z]+)/g
 const SIZE_SUFFIX_PATT = /([A-Za-z]+)/
 const SIZE_MAGNITUDE_PATT = /([0-9]+\.?[0-9]*)/
-const DIGEST_FILENAME = '.packwatch.json'
+const MANIFEST_FILENAME = '.packwatch.json'
 
 const FS_OPTIONS = { encoding: 'utf-8' }
 
@@ -38,36 +38,36 @@ function getCurrentPackageStats() {
 
 function getPreviousPackageStats() {
     try {
-        const currentDigest = readFileSync(DIGEST_FILENAME, FS_OPTIONS)
-        const parsedDigest = JSON.parse(currentDigest)
+        const currentManifest = readFileSync(MANIFEST_FILENAME, FS_OPTIONS)
+        const parsedManifest = JSON.parse(currentManifest)
         return {
-            ...parsedDigest,
-            packageSizeBytes: convertSizeToBytes(parsedDigest.packageSize),
-            unpackedSizeBytes: convertSizeToBytes(parsedDigest.unpackedSize),
-            limitBytes: convertSizeToBytes(parsedDigest.limit),
+            ...parsedManifest,
+            packageSizeBytes: convertSizeToBytes(parsedManifest.packageSize),
+            unpackedSizeBytes: convertSizeToBytes(parsedManifest.unpackedSize),
+            limitBytes: convertSizeToBytes(parsedManifest.limit),
         }
     } catch (e) {
         return {}
     }
 }
 
-function createOrUpdateDigest({ previous, current, updateLimit = false }) {
+function createOrUpdateManifest({ previous, current, updateLimit = false }) {
     const { limit } = previous || {}
     const { packageSize, unpackedSize } = current
 
-    const newDigest = {
+    const newManifest = {
         limit: updateLimit ? packageSize : limit || packageSize,
         packageSize: packageSize,
         unpackedSize: unpackedSize,
     }
 
-    writeFileSync(DIGEST_FILENAME, JSON.stringify(newDigest))
+    writeFileSync(MANIFEST_FILENAME, JSON.stringify(newManifest))
 }
 
 module.exports = {
-    createOrUpdateDigest,
+    createOrUpdateManifest,
     getPreviousPackageStats,
     getCurrentPackageStats,
     convertSizeToBytes,
-    DIGEST_FILENAME,
+    MANIFEST_FILENAME,
 }
