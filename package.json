@@ -1,0 +1,57 @@
+{
+    "name": "packwatch",
+    "version": "0.0.0",
+    "main": "dist/index.js",
+    "description": "📦👀 Keep an eye on your packages' footprint",
+    "keywords": [
+        "npm",
+        "footprint",
+        "package size",
+        "package",
+        "publish",
+        "dependencies"
+    ],
+    "homepage": "https://github.com/mcataford/packwatch#readme",
+    "bugs": {
+        "url": "https://github.com/mcataford/packwatch/issues",
+        "email": "c.marcandre@gmail.com"
+    },
+    "author": "Marc Cataford <c.marcandre@gmail.com>",
+    "license": "MIT",
+    "files": [
+        "dist/**/*.js"
+    ],
+    "bin": "./dist/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mcataford/packwatch.git"
+    },
+    "pre-commit": [
+        "lint",
+        "test"
+    ],
+    "scripts": {
+        "prebuild": "rimraf dist",
+        "build": "babel src -d dist",
+        "lint": "eslint src *.js",
+        "lint:fix": "yarn lint --fix",
+        "test": "jest src",
+        "test:watch": "yarn test --watchAll",
+        "test:coverage": "yarn test --coverage"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.8.4",
+        "@babel/core": "^7.8.6",
+        "@tophat/eslint-config": "^0.6.0",
+        "eslint": "^6.8.0",
+        "eslint-config-prettier": "^6.10.0",
+        "eslint-plugin-import": "^2.20.1",
+        "eslint-plugin-jest": "^23.8.0",
+        "eslint-plugin-prettier": "^3.1.2",
+        "jest": "^25.1.0",
+        "mock-fs": "^4.11.0",
+        "pre-commit": "^1.2.2",
+        "prettier": "^1.19.1",
+        "rimraf": "^3.0.2"
+    }
+}
