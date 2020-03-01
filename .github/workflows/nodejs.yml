@@ -53,7 +53,6 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: github.ref == 'master'
     steps:
     - name: Checkout
       uses: actions/checkout@v1
