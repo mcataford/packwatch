@@ -2,6 +2,10 @@
 
 > It ain't easy being tiny.
 
+
+[![codecov](https://codecov.io/gh/mcataford/packwatch/branch/master/graph/badge.svg)](https://codecov.io/gh/mcataford/packwatch)
+![packwatch CI](https://github.com/mcataford/packwatch/workflows/packwatch%20CI/badge.svg)
+
 ## Overview
 
 `packwatch` is inspired by what projects like [`bundlewatch`](https://github.com/bundlewatch/bundlewatch) do for webpack bundle size monitoring and applies the same general idea to monitor your node packages' tarball sizes across time and help avoid incremental bloat. Keeping your applications as trim as possible is important to provide better experiences to users and to avoid wasting system resources, and being cognizant of the footprint of the packages you put out there is paramount.
