@@ -7,11 +7,11 @@ jest.mock('child_process')
 childProcess.spawnSync = jest.fn(() => ({ stderr: mockPackOutput }))
 
 const {
-    DIGEST_FILENAME,
+    MANIFEST_FILENAME,
     convertSizeToBytes,
     getCurrentPackageStats,
     getPreviousPackageStats,
-    createOrUpdateDigest,
+    createOrUpdateManifest,
 } = require('./helpers')
 
 const mockPackageSize = '1.1 kB'
@@ -83,7 +83,7 @@ describe('Helpers', () => {
             const limit = '1 kB'
             const limitBytes = 1000
             const mockReport = { packageSize, unpackedSize, limit }
-            mockFS({ [DIGEST_FILENAME]: JSON.stringify(mockReport) })
+            mockFS({ [MANIFEST_FILENAME]: JSON.stringify(mockReport) })
 
             expect(getPreviousPackageStats()).toEqual({
                 packageSize,
@@ -95,79 +95,79 @@ describe('Helpers', () => {
             })
         })
 
-        it('returns an empty digest if it fails to reads the digest file', () => {
+        it('returns an empty manifest if it fails to reads the manifest file', () => {
             mockFS({
-                [DIGEST_FILENAME]: 'not valid JSON',
+                [MANIFEST_FILENAME]: 'not valid JSON',
             })
 
             expect(getPreviousPackageStats()).toEqual({})
         })
     })
 
-    describe('Creating or updating the digest', () => {
+    describe('Creating or updating the manifest', () => {
         const currentStats = {
             packageSize: '1 kB',
             unpackedSize: '10 kB',
         }
 
-        const previousDigest = {
+        const previousManifest = {
             limit: '2 kB',
             packageSize: '1.5 kB',
         }
-        it('creates a digest from the current data if no previous data is provided', () => {
+        it('creates a anifest from the current data if no previous data is provided', () => {
             mockFS({})
 
-            createOrUpdateDigest({ current: currentStats })
+            createOrUpdateManifest({ current: currentStats })
 
-            const writtenDigest = readFileSync(DIGEST_FILENAME, {
+            const writtenManifest = readFileSync(MANIFEST_FILENAME, {
                 encoding: 'utf-8',
             })
 
-            expect(JSON.parse(writtenDigest)).toEqual({
+            expect(JSON.parse(writtenManifest)).toEqual({
                 packageSize: currentStats.packageSize,
                 unpackedSize: currentStats.unpackedSize,
                 limit: currentStats.packageSize,
             })
         })
 
-        it('updates the previous digest sizes if previous data exists', () => {
+        it('updates the previous manifest sizes if previous data exists', () => {
             mockFS({
-                [DIGEST_FILENAME]: JSON.stringify(previousDigest),
+                [MANIFEST_FILENAME]: JSON.stringify(previousManifest),
             })
 
-            createOrUpdateDigest({
+            createOrUpdateManifest({
                 current: currentStats,
-                previous: previousDigest,
+                previous: previousManifest,
                 updateLimit: false,
             })
 
-            const writtenDigest = readFileSync(DIGEST_FILENAME, {
+            const writtenManifest = readFileSync(MANIFEST_FILENAME, {
                 encoding: 'utf-8',
             })
 
-            expect(JSON.parse(writtenDigest)).toEqual({
+            expect(JSON.parse(writtenManifest)).toEqual({
                 packageSize: currentStats.packageSize,
                 unpackedSize: currentStats.unpackedSize,
-                limit: previousDigest.limit,
+                limit: previousManifest.limit,
             })
         })
 
-        it('updates the previous digest sizes and limit if previous data exists and updateLimit is set', () => {
+        it('updates the previous manifest sizes and limit if previous data exists and updateLimit is set', () => {
             mockFS({
-                [DIGEST_FILENAME]: JSON.stringify(previousDigest),
+                [MANIFEST_FILENAME]: JSON.stringify(previousManifest),
             })
 
-            createOrUpdateDigest({
+            createOrUpdateManifest({
                 current: currentStats,
-                previous: previousDigest,
+                previous: previousManifest,
                 updateLimit: true,
             })
 
-            const writtenDigest = readFileSync(DIGEST_FILENAME, {
+            const writtenManifest = readFileSync(MANIFEST_FILENAME, {
                 encoding: 'utf-8',
             })
 
-            expect(JSON.parse(writtenDigest)).toEqual({
+            expect(JSON.parse(writtenManifest)).toEqual({
                 packageSize: currentStats.packageSize,
                 unpackedSize: currentStats.unpackedSize,
                 limit: currentStats.packageSize,
