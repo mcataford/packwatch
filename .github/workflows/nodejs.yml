@@ -1,6 +1,6 @@
 name: packwatch CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   lint:
@@ -34,7 +34,7 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
-  
+
   build:
     runs-on: ubuntu-latest
     needs: test
