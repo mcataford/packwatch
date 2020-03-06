@@ -1,6 +1,6 @@
 name: packwatch CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   lint:
@@ -33,7 +33,7 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
+        fail_ci_if_error: false
   
   build:
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: yarn
+    - run: yarn --frozen-lockfile
     - run: yarn build
   release:
     name: Release
