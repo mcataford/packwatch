@@ -1,4 +1,5 @@
 {
     "comments": false,
-    "ignore": ["**/*.test.js"]
+    "ignore": ["**/*.test.js"],
+    "presets": [["@babel/preset-env", { "targets": { "node": 10 } }]]
 }
