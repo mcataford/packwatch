@@ -1,0 +1,28 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "mcataford",
+      "name": "Marc Cataford",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/6210361?v=4",
+      "profile": "https://mcataford.github.io",
+      "contributions": [
+        "ideas",
+        "code",
+        "infra",
+        "test",
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "packwatch",
+  "projectOwner": "mcataford",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
