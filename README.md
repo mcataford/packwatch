@@ -26,7 +26,7 @@ yarn add packwatch -D
 or 
 
 ```
-npm install packwatch --dev
+npm install packwatch --save-dev
 ```
 
 While you can install `packwatch` as a global package, it's better to include it as a devDependency in your project.
