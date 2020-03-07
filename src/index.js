@@ -16,9 +16,7 @@ if (!existsSync('package.json')) {
     process.exit(1)
 }
 
-const UPDATE_MANIFEST_OPTION = '--update-manifest'
-
-const isUpdatingManifest = process.argv.includes(UPDATE_MANIFEST_OPTION)
+const isUpdatingManifest = process.argv.includes('--update-manifest')
 
 const currentStats = getCurrentPackageStats()
 
@@ -28,13 +26,6 @@ const currentStats = getCurrentPackageStats()
  */
 
 if (!existsSync(MANIFEST_FILENAME)) {
-    if (!isUpdatingManifest) {
-        console.log(
-            `🔥🔥📦🔥🔥 No manifest file exists! Run packwatch with ${UPDATE_MANIFEST_OPTION} to generate a manifest file`,
-        )
-        process.exit(1)
-    }
-
     createOrUpdateManifest({ current: currentStats })
     console.log(
         `📝 No Manifest to compare against! Current package stats written to ${MANIFEST_FILENAME}!`,
@@ -42,7 +33,9 @@ if (!existsSync(MANIFEST_FILENAME)) {
     console.log(
         `Package size (${currentStats.packageSize}) adopted as new limit.`,
     )
-    process.exit(0)
+    // If the update flag wasn't specified, exit with a non-zero code so we
+    // don't "accidentally" pass CI builds if the manifest didn't exist
+    process.exit(isUpdatingManifest ? 0 : 1)
 }
 
 const previousStats = getPreviousPackageStats()

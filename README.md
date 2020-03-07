@@ -34,7 +34,7 @@ While you can install `packwatch` as a global package, it's better to include it
 
 ## Usage
 
-`packwatch` tracks your packages' size via its `.packwatch.json` manifest. To get started, call `packwatch --update-manifest` at the root of your project: a fresh manifest will be generated for you using your current package's size as the initial upper limit for package size.
+`packwatch` tracks your packages' size via its `.packwatch.json` manifest. To get started, call `packwatch` at the root of your project: a fresh manifest will be generated for you using your current package's size as the initial upper limit for package size.
 
 Once a manifest file exists, calling `packwatch` again will compare its data to the current state of your package. Every time `packwatch` compares your code to the manifest, it will update the last reported package size statistics it contains, but not the limit you have set.
 
