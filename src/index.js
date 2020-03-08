@@ -33,7 +33,9 @@ if (!existsSync(MANIFEST_FILENAME)) {
     console.log(
         `Package size (${currentStats.packageSize}) adopted as new limit.`,
     )
-    process.exit(0)
+    // If the update flag wasn't specified, exit with a non-zero code so we
+    // don't "accidentally" pass CI builds if the manifest didn't exist
+    process.exit(isUpdatingManifest ? 0 : 1)
 }
 
 const previousStats = getPreviousPackageStats()
