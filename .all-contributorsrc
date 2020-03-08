@@ -25,7 +25,8 @@
       "profile": "http://msrose.github.io",
       "contributions": [
         "infra",
-        "doc"
+        "doc",
+        "code"
       ]
     }
   ],
