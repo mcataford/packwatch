@@ -36,7 +36,7 @@ if (!existsSync(MANIFEST_FILENAME)) {
 
     if (!isUpdatingManifest) {
         console.log(
-            '❗ It looks like you ran PackWatch without a manifest. To prevent accidental passes in CI or hooks, packwatch will termine with an error. If you are running packwatch for the first time in your project, this is expected!',
+            '❗ It looks like you ran PackWatch without a manifest. To prevent accidental passes in CI or hooks, packwatch will terminate with an error. If you are running packwatch for the first time in your project, this is expected!',
         )
     }
     // If the update flag wasn't specified, exit with a non-zero code so we
