@@ -46,6 +46,8 @@ packwatch --update-manifest
 
 Just commit your `.packwatch.json` manifest and you're good to go!
 
+Check out [Packwatch's best practices tips and tricks](https://github.com/mcataford/packwatch/blob/master/BEST_PRACTICES.md) for some advice on how to make the most of it!
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
