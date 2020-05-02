@@ -6,6 +6,10 @@ Monitoring the footprint of the packages you publish can be a powerful first ste
 
 Got best practices questions or suggestions? Open an [issue](https://github.com/mcataford/packwatch/issues)!
 
+### First-run
+
+On the first-run, Packwatch will generate a manifest file that sets the package size and the limit to the same value. Following this, the run will return a non-zero status code. This is perfectly normal! This is meant to ensure that an initial run or a run without a manifest won't pass on CI. The next time you will run Packwatch, it will use the now-present manifest as a comparison point and proceed normally.
+
 ### Understanding `.packwatch.json`
 
 The `.packwatch.json` file persisted in your project keeps track of the last reported package size that was commited to your version control system. At the moment, it consists of three keys:
