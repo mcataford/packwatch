@@ -1,18 +1,19 @@
-const childProcess = require('child_process')
-const { readFileSync } = require('fs')
+import * as childProcess from 'child_process'
+import { readFileSync } from 'fs'
 
-const mockFS = require('mock-fs')
+import mockFS from 'mock-fs'
 
-jest.mock('child_process')
-childProcess.spawnSync = jest.fn(() => ({ stderr: mockPackOutput }))
+jest.mock('child_process', () => ({
+    spawnSync: () => ({ stderr: mockPackOutput })
+}))
 
-const {
+import {
     MANIFEST_FILENAME,
     convertSizeToBytes,
+    createOrUpdateManifest,
     getCurrentPackageStats,
     getPreviousPackageStats,
-    createOrUpdateManifest,
-} = require('./helpers')
+} from './helpers'
 
 const mockPackageSize = '1.1 kB'
 const mockUnpackedSize = '9000 kB'
@@ -100,7 +101,7 @@ describe('Helpers', () => {
                 [MANIFEST_FILENAME]: 'not valid JSON',
             })
 
-            expect(getPreviousPackageStats()).toEqual({})
+            expect(getPreviousPackageStats()).toBeUndefined()
         })
     })
 
