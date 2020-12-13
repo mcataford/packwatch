@@ -3,22 +3,10 @@ import { readFileSync } from 'fs'
 
 import mockFS from 'mock-fs'
 
-jest.mock('child_process', () => ({
-    spawnSync: () => ({ stderr: mockPackOutput })
-}))
+jest.mock('child_process')
 
-import {
-    MANIFEST_FILENAME,
-    convertSizeToBytes,
-    createOrUpdateManifest,
-    getCurrentPackageStats,
-    getPreviousPackageStats,
-} from './helpers'
-
-const mockPackageSize = '1.1 kB'
-const mockUnpackedSize = '9000 kB'
-
-const mockPackOutput = `
+function getPackOutput({ packageSize, unpackedSize }) {
+    return `
 npm notice
 npm notice 📦  footprint@0.0.0
 npm notice === Tarball Contents ===
@@ -29,150 +17,246 @@ npm notice === Tarball Details ===
 npm notice name:          footprint
 npm notice version:       0.0.0
 npm notice filename:      footprint-0.0.0.tgz
-npm notice package size:  ${mockPackageSize}
-npm notice unpacked size: ${mockUnpackedSize}
+npm notice package size:  ${packageSize}
+npm notice unpacked size: ${unpackedSize}
 npm notice shasum:        bdf33d471543cd8126338a82a27b16a9010b8dbd
 npm notice integrity:     sha512-ZZvTg9GVcJw8J[...]bkE0xlqQhlt4Q==
 npm notice total files:   3
 npm notice
     `
-describe('Helpers', () => {
+}
+
+import runPackwatch from '.'
+
+function getManifest() {
+    try {
+        return JSON.parse(readFileSync('.packwatch.json', { encoding: 'utf8' }))
+    } catch {
+        /* No manifest */
+    }
+}
+
+function setupMockFS({
+    hasPackageJSON,
+    hasManifest,
+    manifestLimit,
+    manifestSize,
+}) {
+    const fs = {}
+
+    if (hasPackageJSON) fs['package.json'] = '{}'
+
+    if (hasManifest)
+        fs['.packwatch.json'] = JSON.stringify({
+            unpackedSize: '0.5 B',
+            limitBytes: manifestLimit,
+            limit: `${manifestLimit}  B`,
+            packageSize: `${manifestSize}  B`,
+            packageSizeBytes: manifestSize,
+        })
+    mockFS(fs)
+}
+describe('Packwatch', () => {
+    let mockLogger
     beforeEach(() => {
-        mockFS.restore()
-        jest.restoreAllMocks()
+        mockFS({})
+        mockLogger = jest.spyOn(global.console, 'log').mockImplementation()
     })
+
+    afterEach(jest.restoreAllMocks)
 
     afterAll(mockFS.restore)
 
-    describe('Size string conversion', () => {
-        it.each`
-            sizeString  | expectedValue
-            ${'1 B'}    | ${1}
-            ${'1.1 B'}  | ${1.1}
-            ${'1 kB'}   | ${1000}
-            ${'1.1kB'}  | ${1100}
-            ${'1 mB'}   | ${1000000}
-            ${'1.1 mB'} | ${1100000}
-        `(
-            'converts $sizeString properly to $expectedValue bytes',
-            ({ sizeString, expectedValue }) => {
-                expect(convertSizeToBytes(sizeString)).toEqual(expectedValue)
-            },
+    it('warns the user and errors if run away from package.json', () => {
+        mockFS({})
+        runPackwatch()
+
+        expect(mockLogger.mock.calls).toHaveLength(1)
+        expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(
+            '"🤔 There is no package.json file here. Are you in the root directory of your project?"',
         )
     })
 
-    describe('Current package statistics', () => {
-        it('constructs the current package report properly', () => {
-            const packageSizeBytes = 1100
-            const unpackedSizeBytes = 9000000
+    describe('without manifest', () => {
+        beforeEach(() => {
+            setupMockFS({ hasPackageJSON: true })
+        })
 
-            expect(getCurrentPackageStats()).toEqual({
-                packageSize: mockPackageSize,
-                packageSizeBytes,
-                unpackedSize: mockUnpackedSize,
-                unpackedSizeBytes,
+        it.each(['1 B', '1.1 B', '1 kB', '1.1 kB', '1 mB', '1.1 mB'])(
+            'generates the initial manifest properly (size = %s)',
+            mockSize => {
+                jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                    stderr: getPackOutput({
+                        packageSize: mockSize,
+                        unpackedSize: mockSize,
+                    }),
+                })
+                const returnCode = runPackwatch()
+                const manifest = getManifest()
+                expect(returnCode).toEqual(1)
+                expect(manifest).toEqual({
+                    limit: mockSize,
+                    packageSize: mockSize,
+                    unpackedSize: mockSize,
+                })
+            },
+        )
+
+        it('outputs expected messaging', () => {
+            jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                stderr: getPackOutput({
+                    packageSize: '1 B',
+                    unpackedSize: '2 B',
+                }),
             })
+
+            runPackwatch()
+
+            expect(mockLogger.mock.calls).toHaveLength(2)
+            expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "📝 No Manifest to compare against! Current package stats written to .packwatch.json!
+        Package size (1 B) adopted as new limit."
+      `)
+            expect(mockLogger.mock.calls[1][0]).toMatchInlineSnapshot(
+                '"❗ It looks like you ran PackWatch without a manifest. To prevent accidental passes in CI or hooks, packwatch will terminate with an error. If you are running packwatch for the first time in your project, this is expected!"',
+            )
+        })
+
+        it('outputs expected messaging when not updating the manifest', () => {
+            jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                stderr: getPackOutput({
+                    packageSize: '1 B',
+                    unpackedSize: '2 B',
+                }),
+            })
+
+            runPackwatch({ isUpdatingManifest: true })
+
+            expect(mockLogger.mock.calls).toHaveLength(1)
+            expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "📝 No Manifest to compare against! Current package stats written to .packwatch.json!
+        Package size (1 B) adopted as new limit."
+      `)
         })
     })
 
-    describe('Previous package statistics', () => {
-        it('constructs the previous package report properly', () => {
-            const packageSize = '0.9 kB'
-            const packageSizeBytes = 900
-            const unpackedSize = '90 kB'
-            const unpackedSizeBytes = 90000
-            const limit = '1 kB'
-            const limitBytes = 1000
-            const mockReport = { packageSize, unpackedSize, limit }
-            mockFS({ [MANIFEST_FILENAME]: JSON.stringify(mockReport) })
-
-            expect(getPreviousPackageStats()).toEqual({
-                packageSize,
-                packageSizeBytes,
-                unpackedSize,
-                unpackedSizeBytes,
-                limit,
-                limitBytes,
+    describe('with manifest', () => {
+        it('messages when the size is equal to the limit', () => {
+            setupMockFS({
+                hasPackageJSON: true,
+                hasManifest: true,
+                manifestLimit: 1,
+                manifestSize: 1,
             })
+            jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                stderr: getPackOutput({
+                    packageSize: '1 B',
+                    unpackedSize: '2 B',
+                }),
+            })
+            runPackwatch()
+            expect(mockLogger.mock.calls).toHaveLength(1)
+            expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(
+                '"📦 Nothing to report! Your package is the same size as the latest manifest reports! (Limit: 1  B)"',
+            )
         })
 
-        it('returns an empty manifest if it fails to reads the manifest file', () => {
-            mockFS({
-                [MANIFEST_FILENAME]: 'not valid JSON',
+        it('messages when the size is lower than the limit (no growth)', () => {
+            setupMockFS({
+                hasPackageJSON: true,
+                hasManifest: true,
+                manifestLimit: 5,
+                manifestSize: 1,
             })
-
-            expect(getPreviousPackageStats()).toBeUndefined()
+            jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                stderr: getPackOutput({
+                    packageSize: '1 B',
+                    unpackedSize: '2 B',
+                }),
+            })
+            runPackwatch()
+            expect(mockLogger.mock.calls).toHaveLength(1)
+            expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(
+                '"📦 Nothing to report! Your package is the same size as the latest manifest reports! (Limit: 5  B)"',
+            )
         })
-    })
-
-    describe('Creating or updating the manifest', () => {
-        const currentStats = {
-            packageSize: '1 kB',
-            unpackedSize: '10 kB',
-        }
-
-        const previousManifest = {
-            limit: '2 kB',
-            packageSize: '1.5 kB',
-        }
-        it('creates a anifest from the current data if no previous data is provided', () => {
-            mockFS({})
-
-            createOrUpdateManifest({ current: currentStats })
-
-            const writtenManifest = readFileSync(MANIFEST_FILENAME, {
-                encoding: 'utf-8',
+        it('messages when the size is lower than the limit (growth)', () => {
+            setupMockFS({
+                hasPackageJSON: true,
+                hasManifest: true,
+                manifestLimit: 5,
+                manifestSize: 2,
             })
-
-            expect(JSON.parse(writtenManifest)).toEqual({
-                packageSize: currentStats.packageSize,
-                unpackedSize: currentStats.unpackedSize,
-                limit: currentStats.packageSize,
+            jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                stderr: getPackOutput({
+                    packageSize: '3 B',
+                    unpackedSize: '2 B',
+                }),
             })
+            runPackwatch()
+            expect(mockLogger.mock.calls).toHaveLength(1)
+            expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(
+                '"📦 👀 Your package grew! 3 B > 2  B (Limit: 5  B)"',
+            )
+        })
+        it('messages when the size is lower than the limit (shrinkage)', () => {
+            setupMockFS({
+                hasPackageJSON: true,
+                hasManifest: true,
+                manifestLimit: 5,
+                manifestSize: 2,
+            })
+            jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                stderr: getPackOutput({
+                    packageSize: '1 B',
+                    unpackedSize: '2 B',
+                }),
+            })
+            runPackwatch()
+            expect(mockLogger.mock.calls).toHaveLength(1)
+            expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(
+                '"📦 💯 Your package shrank! 1 B < 2  B (Limit: 5  B)"',
+            )
+        })
+        it('messages when the size exceeds the limit', () => {
+            setupMockFS({
+                hasPackageJSON: true,
+                hasManifest: true,
+                manifestLimit: 0.5,
+                manifestSize: 0.5,
+            })
+            jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                stderr: getPackOutput({
+                    packageSize: '1 B',
+                    unpackedSize: '2 B',
+                }),
+            })
+            runPackwatch()
+            expect(mockLogger.mock.calls).toHaveLength(1)
+            expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "🔥🔥📦🔥🔥 Your package exceeds the limit set in .packwatch.json! 1 B > 0.5  B
+        Either update the limit by using the --update-manifest flag or trim down your packed files!"
+      `)
         })
 
-        it('updates the previous manifest sizes if previous data exists', () => {
-            mockFS({
-                [MANIFEST_FILENAME]: JSON.stringify(previousManifest),
+        it('messages when updating the manifest', () => {
+            setupMockFS({
+                hasPackageJSON: true,
+                hasManifest: true,
+                manifestLimit: 0.5,
+                manifestSize: 0.5,
             })
-
-            createOrUpdateManifest({
-                current: currentStats,
-                previous: previousManifest,
-                updateLimit: false,
+            jest.spyOn(childProcess, 'spawnSync').mockReturnValue({
+                stderr: getPackOutput({
+                    packageSize: '1 B',
+                    unpackedSize: '2 B',
+                }),
             })
-
-            const writtenManifest = readFileSync(MANIFEST_FILENAME, {
-                encoding: 'utf-8',
-            })
-
-            expect(JSON.parse(writtenManifest)).toEqual({
-                packageSize: currentStats.packageSize,
-                unpackedSize: currentStats.unpackedSize,
-                limit: previousManifest.limit,
-            })
-        })
-
-        it('updates the previous manifest sizes and limit if previous data exists and updateLimit is set', () => {
-            mockFS({
-                [MANIFEST_FILENAME]: JSON.stringify(previousManifest),
-            })
-
-            createOrUpdateManifest({
-                current: currentStats,
-                previous: previousManifest,
-                updateLimit: true,
-            })
-
-            const writtenManifest = readFileSync(MANIFEST_FILENAME, {
-                encoding: 'utf-8',
-            })
-
-            expect(JSON.parse(writtenManifest)).toEqual({
-                packageSize: currentStats.packageSize,
-                unpackedSize: currentStats.unpackedSize,
-                limit: currentStats.packageSize,
-            })
+            runPackwatch({ isUpdatingManifest: true })
+            expect(mockLogger.mock.calls).toHaveLength(1)
+            expect(mockLogger.mock.calls[0][0]).toMatchInlineSnapshot(
+                '"📝 Updated the manifest! Package size: 1 B, Limit: 1 B"',
+            )
         })
     })
 })
