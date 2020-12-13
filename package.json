@@ -19,7 +19,7 @@
     "author": "Marc Cataford <c.marcandre@gmail.com>",
     "license": "MIT",
     "files": [
-        "dist/**/*.ts"
+        "dist/*.ts"
     ],
     "bin": "./dist/cli.js",
     "repository": {
@@ -32,7 +32,7 @@
     ],
     "scripts": {
         "prebuild": "rimraf dist",
-        "build": "babel src -d dist --extensions .ts",
+        "build": "babel src/index.ts src/cli.ts -d dist --extensions .ts",
         "lint": "eslint src/**/*.ts",
         "lint:fix": "yarn lint --fix",
         "test": "jest src",

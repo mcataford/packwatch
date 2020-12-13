@@ -3,6 +3,8 @@ import { readFileSync } from 'fs'
 
 import mockFS from 'mock-fs'
 
+import runPackwatch from '..'
+
 jest.mock('child_process')
 
 function getPackOutput({ packageSize, unpackedSize }) {
@@ -25,8 +27,6 @@ npm notice total files:   3
 npm notice
     `
 }
-
-import runPackwatch from '.'
 
 function getManifest() {
     try {
