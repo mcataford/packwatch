@@ -6,5 +6,8 @@ module.exports = {
         "@tophat/eslint-config/jest",
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended"
-    ]
+    ],
+    settings: {
+        'import/resolver': { node: { extensions: ['.ts'] }}
+    }
 }
