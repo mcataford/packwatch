@@ -1,7 +1,7 @@
 {
     "name": "packwatch",
     "version": "0.0.0",
-    "main": "dist/index.js",
+    "main": "dist/cli.js",
     "description": "📦👀 Keep an eye on your packages' footprint",
     "keywords": [
         "npm",
@@ -19,9 +19,9 @@
     "author": "Marc Cataford <c.marcandre@gmail.com>",
     "license": "MIT",
     "files": [
-        "dist/**/*.js"
+        "dist/**/*.ts"
     ],
-    "bin": "./dist/index.js",
+    "bin": "./dist/cli.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/mcataford/packwatch.git"
