@@ -1,5 +1,6 @@
 import { spawnSync } from 'child_process'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { join, resolve } from 'path'
 
 import { Report } from './index.d'
 
@@ -24,9 +25,10 @@ function convertSizeToBytes(sizeString: string): number {
     return multiplier * parseFloat(sizeMagnitude)
 }
 
-function getCurrentPackageStats(): Report {
+function getCurrentPackageStats(cwd: string): Report {
     const { stderr } = spawnSync('npm', ['pack', '--dry-run'], {
         encoding: 'utf-8',
+        cwd,
     })
     const stderrString = String(stderr)
     const packageSize = PACKAGE_SIZE_PATT.exec(stderrString)[1]
@@ -40,9 +42,10 @@ function getCurrentPackageStats(): Report {
     }
 }
 
-function getPreviousPackageStats(): Report | null {
+function getPreviousPackageStats(cwd: string): Report | null {
+    const manifestPath = resolve(join(cwd, MANIFEST_FILENAME))
     try {
-        const currentManifest = readFileSync(MANIFEST_FILENAME, {
+        const currentManifest = readFileSync(manifestPath, {
             encoding: 'utf-8',
         })
         const parsedManifest = JSON.parse(currentManifest)
@@ -60,6 +63,7 @@ function getPreviousPackageStats(): Report | null {
 function createOrUpdateManifest({
     previous,
     current,
+    manifestPath,
     updateLimit = false,
 }: {
     previous?: Report
@@ -75,33 +79,39 @@ function createOrUpdateManifest({
         unpackedSize: unpackedSize,
     }
 
-    writeFileSync(MANIFEST_FILENAME, JSON.stringify(newManifest))
+    writeFileSync(manifestPath, JSON.stringify(newManifest))
 }
-export default function run(
-    {
-        manifestFn = MANIFEST_FILENAME,
-        isUpdatingManifest,
-    }: { manifestFn?: string; isUpdatingManifest?: boolean } = {
-        manifestFn: MANIFEST_FILENAME,
-        isUpdatingManifest: false,
-    },
-): number {
-    if (!existsSync('package.json')) {
+
+export default function run({
+    cwd,
+    isUpdatingManifest,
+}: {
+    cwd?: string
+    isUpdatingManifest?: boolean
+}): number {
+    if (!cwd) {
+        cwd = process.cwd()
+    }
+
+    const packageJsonPath = resolve(join(cwd, 'package.json'))
+    const manifestPath = resolve(join(cwd, MANIFEST_FILENAME))
+
+    if (!existsSync(packageJsonPath)) {
         console.log(
             '🤔 There is no package.json file here. Are you in the root directory of your project?',
         )
         return 1
     }
 
-    const currentStats = getCurrentPackageStats()
+    const currentStats = getCurrentPackageStats(cwd)
 
     /*
      * If there is no manifest file yet, we can use the current package stats as
      * a base to build one. The current package size becomes the limit.
      */
 
-    if (!existsSync(manifestFn)) {
-        createOrUpdateManifest({ current: currentStats })
+    if (!existsSync(manifestPath)) {
+        createOrUpdateManifest({ manifestPath, current: currentStats })
         console.log(
             `📝 No Manifest to compare against! Current package stats written to ${MANIFEST_FILENAME}!\nPackage size (${currentStats.packageSize}) adopted as new limit.`,
         )
@@ -116,7 +126,7 @@ export default function run(
         return isUpdatingManifest ? 0 : 1
     }
 
-    const previousStats = getPreviousPackageStats()
+    const previousStats = getPreviousPackageStats(cwd)
     const { packageSizeBytes, packageSize } = currentStats
     const {
         packageSize: previousSize,
@@ -135,6 +145,7 @@ export default function run(
             previous: previousStats,
             current: currentStats,
             updateLimit: true,
+            manifestPath,
         })
         console.log(
             `📝 Updated the manifest! Package size: ${packageSize}, Limit: ${packageSize}`,
