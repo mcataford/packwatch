@@ -26,10 +26,6 @@
         "type": "git",
         "url": "https://github.com/mcataford/packwatch.git"
     },
-    "pre-commit": [
-        "lint",
-        "test"
-    ],
     "scripts": {
         "prebuild": "rimraf dist",
         "build": "babel src/index.ts src/cli.ts -d dist --extensions .ts",
@@ -51,12 +47,12 @@
         "@typescript-eslint/parser": "^4.9.1",
         "eslint": "^7.0.0",
         "eslint-config-prettier": "^6.10.0",
-        "eslint-plugin-import": "^2.20.1",
+        "eslint-import-resolver-node": "^0.3.4",
+        "eslint-plugin-import": "^2.22.1",
         "eslint-plugin-jest": "^23.8.0",
         "eslint-plugin-prettier": "^3.1.2",
         "jest": "^26.0.1",
         "mock-fs": "^4.11.0",
-        "pre-commit": "^1.2.2",
         "prettier": "^2.0.5",
         "rimraf": "^3.0.2",
         "semantic-release": "^17.0.4",
