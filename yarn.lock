@@ -7501,13 +7501,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mock-fs@npm:^4.11.0":
-  version: 4.13.0
-  resolution: "mock-fs@npm:4.13.0"
-  checksum: cfb2134de7dfa53ebbbbacdd1b4fc834cce99ee9c231e8e129d9d32b669d15936217a7cdef8325946dd4e398ecfc401aa14c79030b8421cdf6ebd904786d8578
-  languageName: node
-  linkType: hard
-
 "modify-values@npm:^1.0.0":
   version: 1.0.1
   resolution: "modify-values@npm:1.0.1"
@@ -8423,7 +8416,6 @@ __metadata:
     eslint-plugin-jest: ^24.1.5
     eslint-plugin-prettier: ^3.1.2
     jest: ^26.0.1
-    mock-fs: ^4.11.0
     prettier: ^2.0.5
     rimraf: ^3.0.2
     semantic-release: ^17.0.4
