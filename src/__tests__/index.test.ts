@@ -204,7 +204,9 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            await packwatch({ cwd: workspacePath })
+            await expect(async () =>
+                packwatch({ cwd: workspacePath }),
+            ).rejects.toThrow('PACKAGE_EXCEEDS_LIMIT')
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
