@@ -3,5 +3,6 @@
 import runPackwatch from '.'
 
 const isUpdatingManifest = process.argv.includes('--update-manifest')
-const processExit = runPackwatch({ isUpdatingManifest })
+const cwd = process.cwd()
+const processExit = runPackwatch({ cwd, isUpdatingManifest })
 process.exit(processExit)

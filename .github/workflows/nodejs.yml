@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [12.x, 14.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [12.x, 14.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -59,7 +59,7 @@ jobs:
     - name: Node setup
       uses: actions/setup-node@v1
       with:
-        node-version: 12
+        node-version: 14
     - name: Prepare
       run: yarn && yarn build
     - name: Release
