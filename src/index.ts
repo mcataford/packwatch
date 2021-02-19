@@ -6,16 +6,14 @@ import {
     getCurrentPackageStats,
     getPreviousPackageStats,
 } from './utils'
+import type { PackwatchArguments } from './index.d'
 
 const MANIFEST_FILENAME = '.packwatch.json'
 
 export default async function packwatch({
     cwd,
     isUpdatingManifest,
-}: {
-    cwd?: string
-    isUpdatingManifest?: boolean
-}): Promise<void> {
+}: PackwatchArguments): Promise<void> {
     const packageJsonPath = resolve(join(cwd, 'package.json'))
     const manifestPath = resolve(join(cwd, MANIFEST_FILENAME))
 
