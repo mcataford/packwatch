@@ -3,7 +3,7 @@ import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 
 import type { Report } from '../index.d'
-import runPackwatch from '..'
+import packwatch from '..'
 
 async function prepareWorkspace(): Promise<string> {
     const workspacePath = await fs.mkdtemp(`${tmpdir()}/`, { recursive: true })
@@ -53,7 +53,7 @@ describe('Packwatch', () => {
 
     it('warns the user and errors if run away from package.json', async () => {
         workspacePath = await prepareWorkspace()
-        runPackwatch({ cwd: workspacePath })
+        await packwatch({ cwd: workspacePath })
 
         expect(mockLogger.mock.calls).toHaveLength(1)
         expect(mockLogger.mock.calls[0][0]).toEqual(
@@ -68,7 +68,7 @@ describe('Packwatch', () => {
             workspacePath = await prepareWorkspace()
             await createPackageJson(workspacePath)
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
 
             const generatedManifest = await fs.readFile(
                 resolve(join(workspacePath, '.packwatch.json')),
@@ -84,7 +84,7 @@ describe('Packwatch', () => {
             workspacePath = await prepareWorkspace()
             await createPackageJson(workspacePath)
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
 
             expect(mockLogger.mock.calls).toHaveLength(2)
             expect(mockLogger.mock.calls[0][0]).toEqual(
@@ -104,7 +104,7 @@ describe('Packwatch', () => {
 
             await createPackageJson(workspacePath)
 
-            runPackwatch({ cwd: workspacePath, isUpdatingManifest: true })
+            await packwatch({ cwd: workspacePath, isUpdatingManifest: true })
 
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
@@ -125,7 +125,7 @@ describe('Packwatch', () => {
                 packageSize: '160B',
                 unpackedSize: '150B',
             })
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -144,7 +144,7 @@ describe('Packwatch', () => {
                 unpackedSize: '150B',
             })
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -162,7 +162,7 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -180,7 +180,7 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -198,7 +198,7 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -217,7 +217,7 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            runPackwatch({ cwd: workspacePath, isUpdatingManifest: true })
+            await packwatch({ cwd: workspacePath, isUpdatingManifest: true })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(

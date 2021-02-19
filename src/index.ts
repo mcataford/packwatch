@@ -9,13 +9,13 @@ import {
 
 const MANIFEST_FILENAME = '.packwatch.json'
 
-export default function run({
+export default async function packwatch({
     cwd,
     isUpdatingManifest,
 }: {
     cwd?: string
     isUpdatingManifest?: boolean
-}): number {
+}): Promise<void> {
     const packageJsonPath = resolve(join(cwd, 'package.json'))
     const manifestPath = resolve(join(cwd, MANIFEST_FILENAME))
 
