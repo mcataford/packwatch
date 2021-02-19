@@ -8,6 +8,7 @@ import {
 } from './utils'
 import type { PackwatchArguments } from './index.d'
 import { assertInPackageRoot } from './invariants'
+import logger from './logger'
 
 const MANIFEST_FILENAME = '.packwatch.json'
 
@@ -28,12 +29,12 @@ export default async function packwatch({
 
     if (!existsSync(manifestPath)) {
         createOrUpdateManifest({ manifestPath, current: currentStats })
-        console.log(
+        logger.log(
             `📝 No Manifest to compare against! Current package stats written to ${MANIFEST_FILENAME}!\nPackage size (${currentStats.packageSize}) adopted as new limit.`,
         )
 
         if (!isUpdatingManifest) {
-            console.log(
+            logger.log(
                 '❗ It looks like you ran PackWatch without a manifest. To prevent accidental passes in CI or hooks, packwatch will terminate with an error. If you are running packwatch for the first time in your project, this is expected!',
             )
             throw new Error('NO_MANIFEST_NO_UPDATE')
@@ -62,7 +63,7 @@ export default async function packwatch({
             updateLimit: true,
             manifestPath,
         })
-        console.log(
+        logger.log(
             `📝 Updated the manifest! Package size: ${packageSize}, Limit: ${packageSize}`,
         )
         return
@@ -74,7 +75,7 @@ export default async function packwatch({
      */
 
     if (hasExceededLimit) {
-        console.log(
+        logger.log(
             `🔥🔥📦🔥🔥 Your package exceeds the limit set in ${MANIFEST_FILENAME}! ${packageSize} > ${limit}\nEither update the limit by using the --update-manifest flag or trim down your packed files!`,
         )
         throw new Error('PACKAGE_EXCEEDS_LIMIT')
@@ -87,15 +88,15 @@ export default async function packwatch({
      */
 
     if (packageSizeBytes > previousSizeBytes) {
-        console.log(
+        logger.log(
             `📦 👀 Your package grew! ${packageSize} > ${previousSize} (Limit: ${limit})`,
         )
     } else if (packageSizeBytes < previousSizeBytes) {
-        console.log(
+        logger.log(
             `📦 💯 Your package shrank! ${packageSize} < ${previousSize} (Limit: ${limit})`,
         )
     } else {
-        console.log(
+        logger.log(
             `📦 Nothing to report! Your package is the same size as the latest manifest reports! (Limit: ${limit})`,
         )
     }
