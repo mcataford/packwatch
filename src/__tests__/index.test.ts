@@ -72,7 +72,7 @@ describe('Packwatch', () => {
 
             await expect(async () =>
                 packwatch({ cwd: workspacePath }),
-            ).rejects.toThrow()
+            ).rejects.toThrow('NO_MANIFEST_NO_UPDATE')
 
             const generatedManifest = await fs.readFile(
                 resolve(join(workspacePath, '.packwatch.json')),
