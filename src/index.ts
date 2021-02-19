@@ -7,6 +7,7 @@ import {
     getPreviousPackageStats,
 } from './utils'
 import type { PackwatchArguments } from './index.d'
+import { assertInPackageRoot } from './invariants'
 
 const MANIFEST_FILENAME = '.packwatch.json'
 
@@ -14,15 +15,9 @@ export default async function packwatch({
     cwd,
     isUpdatingManifest,
 }: PackwatchArguments): Promise<void> {
-    const packageJsonPath = resolve(join(cwd, 'package.json'))
     const manifestPath = resolve(join(cwd, MANIFEST_FILENAME))
 
-    if (!existsSync(packageJsonPath)) {
-        console.log(
-            '🤔 There is no package.json file here. Are you in the root directory of your project?',
-        )
-        return
-    }
+    assertInPackageRoot(cwd)
 
     const currentStats = getCurrentPackageStats(cwd)
 

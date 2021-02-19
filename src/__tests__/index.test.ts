@@ -53,7 +53,9 @@ describe('Packwatch', () => {
 
     it('warns the user and errors if run away from package.json', async () => {
         workspacePath = await prepareWorkspace()
-        await packwatch({ cwd: workspacePath })
+        await expect(async () =>
+            packwatch({ cwd: workspacePath }),
+        ).rejects.toThrow('NOT_IN_PACKAGE_ROOT')
 
         expect(mockLogger.mock.calls).toHaveLength(1)
         expect(mockLogger.mock.calls[0][0]).toEqual(
