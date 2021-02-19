@@ -6,12 +6,12 @@ import type { Report } from '../index.d'
 import packwatch from '..'
 
 async function prepareWorkspace(): Promise<string> {
-    const workspacePath = await fs.mkdtemp(`${tmpdir()}/`, { recursive: true })
+    const workspacePath = await fs.mkdtemp(`${tmpdir()}/`)
     return workspacePath
 }
 
 async function cleanUpWorkspace(paths: string[]): Promise<void> {
-    return Promise.all(
+    await Promise.all(
         paths.map(async path => fs.rmdir(path, { recursive: true })),
     )
 }
@@ -68,7 +68,9 @@ describe('Packwatch', () => {
             workspacePath = await prepareWorkspace()
             await createPackageJson(workspacePath)
 
-            await packwatch({ cwd: workspacePath })
+            await expect(async () =>
+                packwatch({ cwd: workspacePath }),
+            ).rejects.toThrow()
 
             const generatedManifest = await fs.readFile(
                 resolve(join(workspacePath, '.packwatch.json')),
@@ -84,7 +86,9 @@ describe('Packwatch', () => {
             workspacePath = await prepareWorkspace()
             await createPackageJson(workspacePath)
 
-            await packwatch({ cwd: workspacePath })
+            await expect(async () =>
+                packwatch({ cwd: workspacePath }),
+            ).rejects.toThrow()
 
             expect(mockLogger.mock.calls).toHaveLength(2)
             expect(mockLogger.mock.calls[0][0]).toEqual(

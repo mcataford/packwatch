@@ -23,7 +23,7 @@ export default async function packwatch({
         console.log(
             '🤔 There is no package.json file here. Are you in the root directory of your project?',
         )
-        return 1
+        return
     }
 
     const currentStats = getCurrentPackageStats(cwd)
@@ -46,7 +46,8 @@ export default async function packwatch({
         }
         // If the update flag wasn't specified, exit with a non-zero code so we
         // don't "accidentally" pass CI builds if the manifest didn't exist
-        return isUpdatingManifest ? 0 : 1
+        if (!isUpdatingManifest) throw new Error()
+        else return
     }
 
     const previousStats = getPreviousPackageStats(cwd)
@@ -73,7 +74,7 @@ export default async function packwatch({
         console.log(
             `📝 Updated the manifest! Package size: ${packageSize}, Limit: ${packageSize}`,
         )
-        return 0
+        return
     }
 
     /*
@@ -85,7 +86,7 @@ export default async function packwatch({
         console.log(
             `🔥🔥📦🔥🔥 Your package exceeds the limit set in ${MANIFEST_FILENAME}! ${packageSize} > ${limit}\nEither update the limit by using the --update-manifest flag or trim down your packed files!`,
         )
-        return 1
+        return
     }
 
     /*
@@ -107,5 +108,5 @@ export default async function packwatch({
             `📦 Nothing to report! Your package is the same size as the latest manifest reports! (Limit: ${limit})`,
         )
     }
-    return 0
+    return
 }
