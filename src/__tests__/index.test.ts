@@ -104,7 +104,7 @@ describe('Packwatch', () => {
                 ),
             )
             expect(mockError.mock.calls).toHaveLength(1)
-            expect(mockError.mock.calls[1][0]).toEqual(
+            expect(mockError.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
                     'It looks like you ran PackWatch without a manifest. To prevent accidental passes in CI or hooks, packwatch will terminate with an error. If you are running packwatch for the first time in your project, this is expected!',
                 ),
