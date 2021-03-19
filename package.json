@@ -33,7 +33,9 @@
         "lint:fix": "yarn lint --fix",
         "test": "jest src",
         "test:watch": "yarn test --watchAll",
-        "test:coverage": "yarn test --coverage"
+        "test:coverage": "yarn test --coverage",
+        "types": "tsc --noEmit src/**/*.ts",
+        "types:watch": "yarn types --watch"
     },
     "devDependencies": {
         "@babel/cli": "^7.8.4",

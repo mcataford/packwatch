@@ -1,3 +1,8 @@
+export type PackwatchArguments = {
+    cwd?: string
+    isUpdatingManifest?: boolean
+}
+
 export type Report = {
     packageSize: string
     unpackedSize?: string

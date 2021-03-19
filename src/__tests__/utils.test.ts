@@ -1,4 +1,4 @@
-import { convertSizeToBytes } from './utils'
+import { convertSizeToBytes } from '../utils'
 
 describe('utils', () => {
     it.each`
