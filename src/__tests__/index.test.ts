@@ -42,9 +42,9 @@ describe('Packwatch', () => {
     let mockError
     let workspacePath
     beforeEach(() => {
-        mockLogger = jest.spyOn(logger, 'log').mockImplementation()
-        mockWarn = jest.spyOn(logger, 'warn').mockImplementation()
-        mockError = jest.spyOn(logger, 'error').mockImplementation()
+        mockLogger = jest.spyOn(console, 'log').mockImplementation()
+        mockWarn = jest.spyOn(console, 'warn').mockImplementation()
+        mockError = jest.spyOn(console, 'error').mockImplementation()
     })
 
     afterEach(async () => {
