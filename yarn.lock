@@ -5592,7 +5592,6 @@ __metadata:
     eslint-plugin-prettier: ^3.1.2
     jest: ^26.0.1
     prettier: ^2.0.5
-    rimraf: ^3.0.2
     typescript: ^4.1.3
   bin:
     packwatch: ./dist/cli.js
