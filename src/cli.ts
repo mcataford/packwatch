@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import runPackwatch from '.'
+import packwatch from '.'
 
 const isUpdatingManifest = process.argv.includes('--update-manifest')
 const cwd = process.cwd()
-const processExit = runPackwatch({ cwd, isUpdatingManifest })
-process.exit(processExit)
+packwatch({ cwd, isUpdatingManifest })
+    .catch(() => process.exit(1))
+    .then(() => process.exit(0))

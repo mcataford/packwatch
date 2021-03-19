@@ -68,6 +68,7 @@ export function createOrUpdateManifest({
 }: {
     previous?: Report
     current: Report
+    manifestPath: string
     updateLimit?: boolean
 }): void {
     const { limit } = previous || {}

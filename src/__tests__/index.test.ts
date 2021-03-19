@@ -2,16 +2,17 @@ import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 
+import logger from '../logger'
 import type { Report } from '../index.d'
-import runPackwatch from '..'
+import packwatch from '..'
 
 async function prepareWorkspace(): Promise<string> {
-    const workspacePath = await fs.mkdtemp(`${tmpdir()}/`, { recursive: true })
+    const workspacePath = await fs.mkdtemp(`${tmpdir()}/`)
     return workspacePath
 }
 
 async function cleanUpWorkspace(paths: string[]): Promise<void> {
-    return Promise.all(
+    await Promise.all(
         paths.map(async path => fs.rmdir(path, { recursive: true })),
     )
 }
@@ -37,9 +38,13 @@ async function createManifest(
 }
 describe('Packwatch', () => {
     let mockLogger
+    let mockWarn
+    let mockError
     let workspacePath
     beforeEach(() => {
-        mockLogger = jest.spyOn(global.console, 'log').mockImplementation()
+        mockLogger = jest.spyOn(console, 'log').mockImplementation()
+        mockWarn = jest.spyOn(console, 'warn').mockImplementation()
+        mockError = jest.spyOn(console, 'error').mockImplementation()
     })
 
     afterEach(async () => {
@@ -53,7 +58,9 @@ describe('Packwatch', () => {
 
     it('warns the user and errors if run away from package.json', async () => {
         workspacePath = await prepareWorkspace()
-        runPackwatch({ cwd: workspacePath })
+        await expect(async () =>
+            packwatch({ cwd: workspacePath }),
+        ).rejects.toThrow('NOT_IN_PACKAGE_ROOT')
 
         expect(mockLogger.mock.calls).toHaveLength(1)
         expect(mockLogger.mock.calls[0][0]).toEqual(
@@ -68,7 +75,9 @@ describe('Packwatch', () => {
             workspacePath = await prepareWorkspace()
             await createPackageJson(workspacePath)
 
-            runPackwatch({ cwd: workspacePath })
+            await expect(async () =>
+                packwatch({ cwd: workspacePath }),
+            ).rejects.toThrow('NO_MANIFEST_NO_UPDATE')
 
             const generatedManifest = await fs.readFile(
                 resolve(join(workspacePath, '.packwatch.json')),
@@ -84,15 +93,18 @@ describe('Packwatch', () => {
             workspacePath = await prepareWorkspace()
             await createPackageJson(workspacePath)
 
-            runPackwatch({ cwd: workspacePath })
+            await expect(async () =>
+                packwatch({ cwd: workspacePath }),
+            ).rejects.toThrow()
 
-            expect(mockLogger.mock.calls).toHaveLength(2)
-            expect(mockLogger.mock.calls[0][0]).toEqual(
+            expect(mockWarn.mock.calls).toHaveLength(1)
+            expect(mockWarn.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
                     /No Manifest to compare against! Current package stats written to \.packwatch\.json!\nPackage size \(\d+ B\) adopted as new limit\./,
                 ),
             )
-            expect(mockLogger.mock.calls[1][0]).toEqual(
+            expect(mockError.mock.calls).toHaveLength(1)
+            expect(mockError.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
                     'It looks like you ran PackWatch without a manifest. To prevent accidental passes in CI or hooks, packwatch will terminate with an error. If you are running packwatch for the first time in your project, this is expected!',
                 ),
@@ -104,10 +116,10 @@ describe('Packwatch', () => {
 
             await createPackageJson(workspacePath)
 
-            runPackwatch({ cwd: workspacePath, isUpdatingManifest: true })
+            await packwatch({ cwd: workspacePath, isUpdatingManifest: true })
 
-            expect(mockLogger.mock.calls).toHaveLength(1)
-            expect(mockLogger.mock.calls[0][0]).toEqual(
+            expect(mockWarn.mock.calls).toHaveLength(1)
+            expect(mockWarn.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
                     /No Manifest to compare against! Current package stats written to \.packwatch\.json!\nPackage size \(\d+ B\) adopted as new limit\./,
                 ),
@@ -125,7 +137,7 @@ describe('Packwatch', () => {
                 packageSize: '160B',
                 unpackedSize: '150B',
             })
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -144,7 +156,7 @@ describe('Packwatch', () => {
                 unpackedSize: '150B',
             })
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -162,7 +174,7 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -180,7 +192,7 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            runPackwatch({ cwd: workspacePath })
+            await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
@@ -198,9 +210,11 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            runPackwatch({ cwd: workspacePath })
-            expect(mockLogger.mock.calls).toHaveLength(1)
-            expect(mockLogger.mock.calls[0][0]).toEqual(
+            await expect(async () =>
+                packwatch({ cwd: workspacePath }),
+            ).rejects.toThrow('PACKAGE_EXCEEDS_LIMIT')
+            expect(mockError.mock.calls).toHaveLength(1)
+            expect(mockError.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
                     /Your package exceeds the limit set in \.packwatch\.json! \d+ B > 10B\nEither update the limit by using the --update-manifest flag or trim down your packed files!/,
                 ),
@@ -217,7 +231,7 @@ describe('Packwatch', () => {
                 unpackedSize: '140B',
             })
 
-            runPackwatch({ cwd: workspacePath, isUpdatingManifest: true })
+            await packwatch({ cwd: workspacePath, isUpdatingManifest: true })
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
