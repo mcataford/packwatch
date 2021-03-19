@@ -29,12 +29,12 @@ export default async function packwatch({
 
     if (!existsSync(manifestPath)) {
         createOrUpdateManifest({ manifestPath, current: currentStats })
-        logger.log(
+        logger.warn(
             `📝 No Manifest to compare against! Current package stats written to ${MANIFEST_FILENAME}!\nPackage size (${currentStats.packageSize}) adopted as new limit.`,
         )
 
         if (!isUpdatingManifest) {
-            logger.log(
+            logger.error(
                 '❗ It looks like you ran PackWatch without a manifest. To prevent accidental passes in CI or hooks, packwatch will terminate with an error. If you are running packwatch for the first time in your project, this is expected!',
             )
             throw new Error('NO_MANIFEST_NO_UPDATE')
@@ -75,7 +75,7 @@ export default async function packwatch({
      */
 
     if (hasExceededLimit) {
-        logger.log(
+        logger.error(
             `🔥🔥📦🔥🔥 Your package exceeds the limit set in ${MANIFEST_FILENAME}! ${packageSize} > ${limit}\nEither update the limit by using the --update-manifest flag or trim down your packed files!`,
         )
         throw new Error('PACKAGE_EXCEEDS_LIMIT')
