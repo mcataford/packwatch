@@ -2,11 +2,14 @@ import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 
-import type { Report } from '../index.d'
-import packwatch from '..'
+import type { Report } from '../src/types'
+import packwatch from '../src'
+
+let workspace: string | null
 
 async function prepareWorkspace(): Promise<string> {
     const workspacePath = await fs.mkdtemp(`${tmpdir()}/`)
+    workspace = workspacePath
     return workspacePath
 }
 
@@ -35,28 +38,21 @@ async function createManifest(
     const path = resolve(join(cwd, '.packwatch.json'))
     await createFile(path, JSON.stringify(configuration))
 }
-describe('Packwatch', () => {
-    let mockLogger = jest.fn()
-    let mockWarn = jest.fn()
-    let mockError = jest.fn()
-    let workspacePath
-    beforeEach(() => {
-        mockLogger = jest.spyOn(console, 'log').mockImplementation()
-        mockWarn = jest.spyOn(console, 'warn').mockImplementation()
-        mockError = jest.spyOn(console, 'error').mockImplementation()
-    })
 
+describe('Packwatch', () => {
     afterEach(async () => {
         jest.restoreAllMocks()
 
-        if (workspacePath) {
-            await cleanUpWorkspace([workspacePath])
-            workspacePath = null
+        if (workspace) {
+            await cleanUpWorkspace([workspace])
+            workspace = null
         }
     })
 
     it('warns the user and errors if run away from package.json', async () => {
-        workspacePath = await prepareWorkspace()
+        const workspacePath = await prepareWorkspace()
+        const mockLogger = jest.spyOn(console, 'log')
+
         await expect(async () =>
             packwatch({ cwd: workspacePath }),
         ).rejects.toThrow('NOT_IN_PACKAGE_ROOT')
@@ -71,7 +67,7 @@ describe('Packwatch', () => {
 
     describe('without manifest', () => {
         it('generates the initial manifest properly', async () => {
-            workspacePath = await prepareWorkspace()
+            const workspacePath = await prepareWorkspace()
             await createPackageJson(workspacePath)
 
             await expect(async () =>
@@ -89,7 +85,9 @@ describe('Packwatch', () => {
         })
 
         it('outputs expected messaging', async () => {
-            workspacePath = await prepareWorkspace()
+            const workspacePath = await prepareWorkspace()
+            const mockWarn = jest.spyOn(console, 'warn')
+            const mockError = jest.spyOn(console, 'error')
             await createPackageJson(workspacePath)
 
             await expect(async () =>
@@ -111,7 +109,8 @@ describe('Packwatch', () => {
         })
 
         it('outputs expected messaging when not updating the manifest', async () => {
-            workspacePath = await prepareWorkspace()
+            const mockWarn = jest.spyOn(console, 'warn')
+            const workspacePath = await prepareWorkspace()
 
             await createPackageJson(workspacePath)
 
@@ -128,13 +127,15 @@ describe('Packwatch', () => {
 
     describe('with manifest', () => {
         it('messages when the size is equal to the limit', async () => {
-            workspacePath = await prepareWorkspace()
-
+            const workspacePath = await prepareWorkspace()
+            const mockLogger = jest.spyOn(console, 'log')
             await createPackageJson(workspacePath)
             await createManifest(workspacePath, {
                 limit: '160B',
                 packageSize: '160B',
+                packageSizeBytes: 160,
                 unpackedSize: '150B',
+                unpackedSizeBytes: 150,
             })
             await packwatch({ cwd: workspacePath })
             expect(mockLogger.mock.calls).toHaveLength(1)
@@ -146,13 +147,15 @@ describe('Packwatch', () => {
         })
 
         it('messages when the size is lower than the limit (no growth)', async () => {
-            workspacePath = await prepareWorkspace()
-
+            const workspacePath = await prepareWorkspace()
+            const mockLogger = jest.spyOn(console, 'log')
             await createPackageJson(workspacePath)
             await createManifest(workspacePath, {
                 limit: '170B',
                 packageSize: '160B',
+                packageSizeBytes: 160,
                 unpackedSize: '150B',
+                unpackedSizeBytes: 150,
             })
 
             await packwatch({ cwd: workspacePath })
@@ -164,13 +167,15 @@ describe('Packwatch', () => {
             )
         })
         it('messages when the size is lower than the limit (growth)', async () => {
-            workspacePath = await prepareWorkspace()
-
+            const workspacePath = await prepareWorkspace()
+            const mockLogger = jest.spyOn(console, 'log')
             await createPackageJson(workspacePath)
             await createManifest(workspacePath, {
                 limit: '180B',
                 packageSize: '150B',
+                packageSizeBytes: 150,
                 unpackedSize: '140B',
+                unpackedSizeBytes: 140,
             })
 
             await packwatch({ cwd: workspacePath })
@@ -182,13 +187,15 @@ describe('Packwatch', () => {
             )
         })
         it('messages when the size is lower than the limit (shrinkage)', async () => {
-            workspacePath = await prepareWorkspace()
-
+            const workspacePath = await prepareWorkspace()
+            const mockLogger = jest.spyOn(console, 'log')
             await createPackageJson(workspacePath)
             await createManifest(workspacePath, {
                 limit: '180B',
                 packageSize: '170B',
+                packageSizeBytes: 170,
                 unpackedSize: '140B',
+                unpackedSizeBytes: 140,
             })
 
             await packwatch({ cwd: workspacePath })
@@ -200,13 +207,15 @@ describe('Packwatch', () => {
             )
         })
         it('messages when the size exceeds the limit', async () => {
-            workspacePath = await prepareWorkspace()
-
+            const workspacePath = await prepareWorkspace()
+            const mockError = jest.spyOn(console, 'error')
             await createPackageJson(workspacePath)
             await createManifest(workspacePath, {
                 limit: '10B',
                 packageSize: '170B',
+                packageSizeBytes: 170,
                 unpackedSize: '140B',
+                unpackedSizeBytes: 140,
             })
 
             await expect(async () =>
@@ -221,13 +230,15 @@ describe('Packwatch', () => {
         })
 
         it('messages when updating the manifest', async () => {
-            workspacePath = await prepareWorkspace()
-
+            const workspacePath = await prepareWorkspace()
+            const mockLogger = jest.spyOn(console, 'log')
             await createPackageJson(workspacePath)
             await createManifest(workspacePath, {
                 limit: '10B',
                 packageSize: '170B',
+                packageSizeBytes: 170,
                 unpackedSize: '140B',
+                unpackedSizeBytes: 140,
             })
 
             await packwatch({ cwd: workspacePath, isUpdatingManifest: true })

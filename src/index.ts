@@ -7,7 +7,7 @@ import {
     getPreviousPackageStats,
     mergeDefaultArguments,
 } from './utils'
-import type { PackwatchArguments } from './index.d'
+import type { PackwatchArguments } from './types'
 import { assertInPackageRoot } from './invariants'
 import logger from './logger'
 
@@ -52,8 +52,7 @@ export default async function packwatch(
         limit,
         limitBytes,
     } = previousStats
-    const hasExceededLimit =
-        packageSizeBytes > (limitBytes ?? Number.MAX_SAFE_INTEGER)
+    const hasExceededLimit = limitBytes && packageSizeBytes > limitBytes
 
     /*
      * If we are updating the manifest, we can write right away and terminate.
