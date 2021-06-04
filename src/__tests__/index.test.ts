@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join, resolve } from 'path'
@@ -37,9 +38,9 @@ async function createManifest(
     await createFile(path, JSON.stringify(configuration))
 }
 describe('Packwatch', () => {
-    let mockLogger
-    let mockWarn
-    let mockError
+    let mockLogger = jest.fn()
+    let mockWarn = jest.fn()
+    let mockError = jest.fn()
     let workspacePath
     beforeEach(() => {
         mockLogger = jest.spyOn(console, 'log').mockImplementation()

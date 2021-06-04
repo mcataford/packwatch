@@ -2,7 +2,7 @@ import { spawnSync } from 'child_process'
 import { readFileSync, writeFileSync } from 'fs'
 import { join, resolve } from 'path'
 
-import { Report } from './index.d'
+import { PackwatchArguments, Report } from './index.d'
 
 const PACKAGE_SIZE_PATT = /package size:\s*([0-9]+\.?[0-9]*\s+[A-Za-z]{1,2})/
 const UNPACKED_SIZE_PATT = /unpacked size:\s*([0-9]+\.?[0-9]*\s+[A-Za-z]{1,2})/
@@ -11,9 +11,18 @@ const SIZE_MAGNITUDE_PATT = /([0-9]+\.?[0-9]*)/
 
 const MANIFEST_FILENAME = '.packwatch.json'
 
+export function mergeDefaultArguments(
+    args: Partial<PackwatchArguments>,
+): PackwatchArguments {
+    return {
+        cwd: args.cwd ?? '.',
+        isUpdatingManifest: args.isUpdatingManifest ?? false,
+    }
+}
+
 export function convertSizeToBytes(sizeString: string): number {
-    const sizeSuffix = SIZE_SUFFIX_PATT.exec(sizeString)[1]
-    const sizeMagnitude = SIZE_MAGNITUDE_PATT.exec(sizeString)[1]
+    const sizeSuffix = SIZE_SUFFIX_PATT.exec(sizeString)?.[1] ?? ''
+    const sizeMagnitude = SIZE_MAGNITUDE_PATT.exec(sizeString)?.[1] ?? '0.0'
 
     let multiplier = 1
 
@@ -31,8 +40,8 @@ export function getCurrentPackageStats(cwd: string): Report {
         cwd,
     })
     const stderrString = String(stderr)
-    const packageSize = PACKAGE_SIZE_PATT.exec(stderrString)[1]
-    const unpackedSize = UNPACKED_SIZE_PATT.exec(stderrString)[1]
+    const packageSize = PACKAGE_SIZE_PATT.exec(stderrString)?.[1] ?? '0'
+    const unpackedSize = UNPACKED_SIZE_PATT.exec(stderrString)?.[1] ?? '0'
 
     return {
         packageSize,
@@ -42,7 +51,7 @@ export function getCurrentPackageStats(cwd: string): Report {
     }
 }
 
-export function getPreviousPackageStats(cwd: string): Report | null {
+export function getPreviousPackageStats(cwd: string): Report {
     const manifestPath = resolve(join(cwd, MANIFEST_FILENAME))
     try {
         const currentManifest = readFileSync(manifestPath, {
@@ -57,6 +66,13 @@ export function getPreviousPackageStats(cwd: string): Report | null {
         }
     } catch {
         /* No manifest */
+        return {
+            packageSize: '0',
+            packageSizeBytes: 0,
+            unpackedSizeBytes: 0,
+            unpackedSize: '0',
+            limitBytes: 0,
+        }
     }
 }
 
