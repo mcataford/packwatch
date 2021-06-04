@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { convertSizeToBytes } from '../utils'
 
 describe('utils', () => {

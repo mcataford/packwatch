@@ -1,9 +1,7 @@
-// @ts-nocheck
 import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 
-import logger from '../logger'
 import type { Report } from '../index.d'
 import packwatch from '..'
 
