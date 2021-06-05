@@ -5,17 +5,19 @@ import {
     createOrUpdateManifest,
     getCurrentPackageStats,
     getPreviousPackageStats,
+    mergeDefaultArguments,
 } from './utils'
-import type { PackwatchArguments } from './index.d'
+import type { PackwatchArguments } from './types'
 import { assertInPackageRoot } from './invariants'
 import logger from './logger'
 
 const MANIFEST_FILENAME = '.packwatch.json'
 
-export default async function packwatch({
-    cwd,
-    isUpdatingManifest,
-}: PackwatchArguments): Promise<void> {
+export default async function packwatch(
+    args: Partial<PackwatchArguments>,
+): Promise<void> {
+    const { cwd, isUpdatingManifest } = mergeDefaultArguments(args)
+
     const manifestPath = resolve(join(cwd, MANIFEST_FILENAME))
 
     assertInPackageRoot(cwd)
@@ -50,7 +52,7 @@ export default async function packwatch({
         limit,
         limitBytes,
     } = previousStats
-    const hasExceededLimit = packageSizeBytes > limitBytes
+    const hasExceededLimit = limitBytes && packageSizeBytes > limitBytes
 
     /*
      * If we are updating the manifest, we can write right away and terminate.
