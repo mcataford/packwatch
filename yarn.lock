@@ -1846,10 +1846,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^14.14.13":
+"@types/node@npm:*":
   version: 14.14.30
   resolution: "@types/node@npm:14.14.30"
   checksum: 9283bf3233cb1508a06df34d078107b014bf737efd14f656769608e9b4190d118c045ff6172ab04fc1e2c61ff10712df92ac0403542886e063f5500b5f654538
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:14.17.2":
+  version: 14.17.2
+  resolution: "@types/node@npm:14.17.2"
+  checksum: 7a2e90989ce2948d3cdfc1d15fb5f0439ea53971d81a466ad049922bb23ef38252f6639271ae5899670ab93d48ed62542ad687767e45ffa6fe902ce59f518e5b
   languageName: node
   linkType: hard
 
@@ -3207,14 +3214,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^7.2.0":
-  version: 7.2.0
-  resolution: "eslint-config-prettier@npm:7.2.0"
+"eslint-config-prettier@npm:8.3.0":
+  version: 8.3.0
+  resolution: "eslint-config-prettier@npm:8.3.0"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: 6812150ea49703cd64035527205b4905bc1edcd34646e71f71665e1acff9ab4648f872598389bdb209964093ad73993830a2c821ba12642764a5293513b92a58
+  checksum: 94ccbb50fb67e5e47e8ba6cfa257b5cbf53619990ab13f46b99518cfe9b900394b93bdf6ffedbde1a8e2997d301b0fbd73a6b4202146bc53475dfb30a8c812f2
   languageName: node
   linkType: hard
 
@@ -5820,11 +5827,11 @@ __metadata:
     "@babel/preset-typescript": ^7.12.7
     "@tophat/eslint-config": ^0.7.0
     "@types/jest": 26.0.23
-    "@types/node": ^14.14.13
+    "@types/node": 14.17.2
     "@typescript-eslint/eslint-plugin": ^4.9.1
     "@typescript-eslint/parser": ^4.9.1
     eslint: ^7.0.0
-    eslint-config-prettier: ^7.2.0
+    eslint-config-prettier: 8.3.0
     eslint-import-resolver-node: ^0.3.4
     eslint-plugin-import: ^2.22.1
     eslint-plugin-jest: ^24.1.5
