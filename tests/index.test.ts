@@ -15,7 +15,7 @@ async function prepareWorkspace(): Promise<string> {
 
 async function cleanUpWorkspace(paths: string[]): Promise<void> {
     await Promise.all(
-        paths.map(async path => fs.rmdir(path, { recursive: true })),
+        paths.map(async (path) => fs.rmdir(path, { recursive: true })),
     )
 }
 
