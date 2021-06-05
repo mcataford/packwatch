@@ -723,20 +723,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tophat/eslint-config@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "@tophat/eslint-config@npm:0.7.0"
+"@tophat/eslint-config@npm:0.9.0":
+  version: 0.9.0
+  resolution: "@tophat/eslint-config@npm:0.9.0"
   peerDependencies:
-    eslint: ">=6.0.0"
-    eslint-config-prettier: ">=6.0.0"
+    eslint: ">=7.0.0"
+    eslint-config-prettier: ">=8.0.0"
     eslint-plugin-import: ">=2.18.0"
-    eslint-plugin-jest: ">=23.0.0"
+    eslint-plugin-jest: ">=24.1.5"
     eslint-plugin-jsx-a11y: ">=6.0.0"
     eslint-plugin-prettier: ">=3.0.0"
     eslint-plugin-react: ">=7.0.0"
     eslint-plugin-react-hooks: ">=2.0.0"
-    prettier: ">=1.0.0"
-  checksum: e78b4d67367686a8ba7fd32b784cd2481e6f121019178ab26ab8f1e7f87e90c8817a906c0a3842b2ef127bdf7fe0bd61f91d91f0dcb91895bc2c8a93c237ea75
+    prettier: ">=2.0.0"
+  checksum: ea79e1dc33827b9f6fbf18e59bd766db4e6fdf60793189d1df68308eaa7d1362125e247e0df888acc10163193fb3f153b30ad006e420b70e82c8e480844ce1cf
   languageName: node
   linkType: hard
 
@@ -4194,7 +4194,7 @@ fsevents@^2.3.2:
   version: 0.0.0-use.local
   resolution: "packwatch@workspace:."
   dependencies:
-    "@tophat/eslint-config": ^0.7.0
+    "@tophat/eslint-config": 0.9.0
     "@types/jest": 26.0.23
     "@types/node": 14.17.2
     "@typescript-eslint/eslint-plugin": ^4.26.0
