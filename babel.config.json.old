@@ -1,5 +1,0 @@
-{
-    "comments": false,
-    "ignore": ["**/*.test.js"],
-    "presets": ["@babel/preset-typescript", ["@babel/preset-env", { "targets": { "node": 10 } }]]
-}
