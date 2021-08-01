@@ -723,12 +723,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tophat/eslint-config@npm:0.9.0":
-  version: 0.9.0
-  resolution: "@tophat/eslint-config@npm:0.9.0"
+"@tophat/eslint-config@npm:0.10.5":
+  version: 0.10.5
+  resolution: "@tophat/eslint-config@npm:0.10.5"
   peerDependencies:
+    "@tophat/eslint-import-resolver-require": ">=0.1.3"
+    "@typescript-eslint/eslint-plugin": ">=4.27.0"
+    "@typescript-eslint/parser": ">=4.27.0"
     eslint: ">=7.0.0"
     eslint-config-prettier: ">=8.0.0"
+    eslint-import-resolver-typescript: ">=2.4.0"
     eslint-plugin-import: ">=2.18.0"
     eslint-plugin-jest: ">=24.1.5"
     eslint-plugin-jsx-a11y: ">=6.0.0"
@@ -736,7 +740,17 @@ __metadata:
     eslint-plugin-react: ">=7.0.0"
     eslint-plugin-react-hooks: ">=2.0.0"
     prettier: ">=2.0.0"
-  checksum: ea79e1dc33827b9f6fbf18e59bd766db4e6fdf60793189d1df68308eaa7d1362125e247e0df888acc10163193fb3f153b30ad006e420b70e82c8e480844ce1cf
+    typescript: ">=3"
+  peerDependenciesMeta:
+    "@tophat/eslint-import-resolver-require":
+      optional: true
+    eslint-plugin-jsx-a11y:
+      optional: true
+    eslint-plugin-react:
+      optional: true
+    eslint-plugin-react-hooks:
+      optional: true
+  checksum: e65164086d54bbaf07e05e7ca5e5b51626817d5a5c56eb63da640a49c49d033a6d77ef73bf496aa6a62fcddf4d6de14776c635166835ab9c6882df644e2187cd
   languageName: node
   linkType: hard
 
@@ -4194,7 +4208,7 @@ fsevents@^2.3.2:
   version: 0.0.0-use.local
   resolution: "packwatch@workspace:."
   dependencies:
-    "@tophat/eslint-config": 0.9.0
+    "@tophat/eslint-config": 0.10.5
     "@types/jest": 26.0.23
     "@types/node": 14.17.2
     "@typescript-eslint/eslint-plugin": ^4.26.0
