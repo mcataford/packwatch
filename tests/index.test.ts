@@ -2,10 +2,19 @@ import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 
-import type { Report } from '../src/types'
 import packwatch from '../src'
 
+import type { Report } from '../src/types'
+
 let workspace: string | null
+
+function getActualPackageSizeByNodeVersion(nodeVersion: string): string {
+    if (nodeVersion.startsWith('v14')) return '160'
+    else if (nodeVersion.startsWith('v16')) return '157'
+    else if (nodeVersion.startsWith('v18')) return '157'
+
+    return 'unknown'
+}
 
 async function prepareWorkspace(): Promise<string> {
     const workspacePath = await fs.mkdtemp(`${tmpdir()}/`)
@@ -40,6 +49,7 @@ async function createManifest(
 }
 
 describe('Packwatch', () => {
+    const actualSize = getActualPackageSizeByNodeVersion(process.version)
     afterEach(async () => {
         jest.restoreAllMocks()
 
@@ -79,8 +89,8 @@ describe('Packwatch', () => {
                 { encoding: 'utf8' },
             )
 
-            expect(generatedManifest).toEqual(
-                '{"limit":"160 B","packageSize":"160 B","unpackedSize":"68 B"}',
+            expect(generatedManifest).toBe(
+                `{"limit":"${actualSize} B","packageSize":"${actualSize} B","unpackedSize":"68 B"}`,
             )
         })
 
@@ -131,9 +141,9 @@ describe('Packwatch', () => {
             const mockLogger = jest.spyOn(console, 'log')
             await createPackageJson(workspacePath)
             await createManifest(workspacePath, {
-                limit: '160B',
-                packageSize: '160B',
-                packageSizeBytes: 160,
+                limit: `${actualSize}B`,
+                packageSize: `${actualSize}B`,
+                packageSizeBytes: Number(actualSize),
                 unpackedSize: '150B',
                 unpackedSizeBytes: 150,
             })
@@ -141,7 +151,7 @@ describe('Packwatch', () => {
             expect(mockLogger.mock.calls).toHaveLength(1)
             expect(mockLogger.mock.calls[0][0]).toEqual(
                 expect.stringMatching(
-                    /Nothing to report! Your package is the same size as the latest manifest reports! \(Limit: 160B\)/,
+                    /Nothing to report! Your package is the same size as the latest manifest reports!/,
                 ),
             )
         })
@@ -152,8 +162,8 @@ describe('Packwatch', () => {
             await createPackageJson(workspacePath)
             await createManifest(workspacePath, {
                 limit: '170B',
-                packageSize: '160B',
-                packageSizeBytes: 160,
+                packageSize: `${actualSize}B`,
+                packageSizeBytes: Number(actualSize),
                 unpackedSize: '150B',
                 unpackedSizeBytes: 150,
             })

@@ -1,15 +1,16 @@
 import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 
+import { assertInPackageRoot } from './invariants'
+import logger from './logger'
 import {
     createOrUpdateManifest,
     getCurrentPackageStats,
     getPreviousPackageStats,
     mergeDefaultArguments,
 } from './utils'
+
 import type { PackwatchArguments } from './types'
-import { assertInPackageRoot } from './invariants'
-import logger from './logger'
 
 const MANIFEST_FILENAME = '.packwatch.json'
 

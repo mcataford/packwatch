@@ -7,7 +7,7 @@ module.exports = {
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended"
     ],
-    settings: {
-        'import/resolver': { node: { extensions: ['.ts'] }}
+    parserOptions: {
+        project: ['./tsconfig.eslint.json']
     }
 }
