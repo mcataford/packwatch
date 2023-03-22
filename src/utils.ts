@@ -2,7 +2,7 @@ import { spawnSync } from 'child_process'
 import { readFileSync, writeFileSync } from 'fs'
 import { join, resolve } from 'path'
 
-import { PackwatchArguments, Report } from './types'
+import { type PackwatchArguments, type Report } from './types'
 
 const PACKAGE_SIZE_PATT = /package size:\s*([0-9]+\.?[0-9]*\s+[A-Za-z]{1,2})/
 const UNPACKED_SIZE_PATT = /unpacked size:\s*([0-9]+\.?[0-9]*\s+[A-Za-z]{1,2})/

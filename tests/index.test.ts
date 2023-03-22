@@ -2,8 +2,9 @@ import { promises as fs } from 'fs'
 import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 
-import type { Report } from '../src/types'
 import packwatch from '../src'
+
+import type { Report } from '../src/types'
 
 let workspace: string | null
 
@@ -79,7 +80,7 @@ describe('Packwatch', () => {
                 { encoding: 'utf8' },
             )
 
-            expect(generatedManifest).toEqual(
+            expect(generatedManifest).toBe(
                 '{"limit":"160 B","packageSize":"160 B","unpackedSize":"68 B"}',
             )
         })
