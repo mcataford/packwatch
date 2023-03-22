@@ -6,16 +6,42 @@ on:
     branches: [master]
 
 jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14, 16, 18]
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - uses: actions/cache@v3
+      if: dependencies-cache
+      env:
+        cache-name: dependencies-cache
+      with:
+        path: .yarn
+        key: ${{ runner.os }}-build-${{env.cache-name}}-${{ hashFile('**/yarn.lock') }}-node-${{ matrix.node-version }}
+    - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+      run: yarn
   lint:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: Use Node.js 12.x
-      uses: actions/setup-node@v3
+    - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: yarn
+    - uses: actions/cache@v3
+      if: dependencies-cache
+      env:
+        cache-name: dependencies-cache
+      with:
+        path: .yarn
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFile('**/yarn.lock') }}-node-18
     - run: yarn lint
   test:
     runs-on: ubuntu-latest
@@ -30,7 +56,13 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: yarn
+    - uses: actions/cache@v3
+      if: dependencies-cache
+      env:
+        cache-name: dependencies-cache
+      with:
+        path: .yarn
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFile('**/yarn.lock') }}-node-${{ matrix.node-version }}
     - run: yarn test:coverage
     - name: Coverage
       uses: codecov/codecov-action@v1
@@ -50,5 +82,11 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: yarn --immutable
+    - uses: actions/cache@v3
+      if: dependencies-cache
+      env:
+        cache-name: dependencies-cache
+      with:
+        path: .yarn
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFile('**/yarn.lock') }}-node-${{ matrix.node-version }}
     - run: yarn build
