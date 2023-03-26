@@ -14,7 +14,7 @@
         "skipLibCheck": true, 
         "forceConsistentCasingInFileNames": true
     },
-    "include": ["src", ".eslintrc.js"],
+    "include": ["src"],
     "exclude": [
         "dist/**/*",
         "tests/**/*"
