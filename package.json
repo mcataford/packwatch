@@ -30,8 +30,8 @@
         "prepack": "yarn build",
         "prebuild": "rm -rf dist",
         "build": "tsc --project .",
-        "lint": "eslint tests/**/*.ts src/**/*.ts",
-        "lint:fix": "yarn lint --fix",
+        "lint": "yarn rome format src tests && yarn rome check src tests",
+        "lint:fix": "yarn rome format src tests --write && yarn rome check src tests --apply",
         "test": "jest tests",
         "test:watch": "yarn test --watchAll",
         "test:coverage": "yarn test --coverage",
@@ -39,19 +39,10 @@
         "types:watch": "yarn types --watch"
     },
     "devDependencies": {
-        "@tophat/eslint-config": "^6.0.1",
         "@types/jest": "^29.5.0",
         "@types/node": "^18.15.5",
-        "@typescript-eslint/eslint-plugin": "^5.56.0",
-        "@typescript-eslint/parser": "^5.56.0",
-        "eslint": "^8.36.0",
-        "eslint-config-prettier": "^8.8.0",
-        "eslint-import-resolver-node": "^0.3.7",
-        "eslint-plugin-import": "^2.27.5",
-        "eslint-plugin-jest": "^27.2.1",
-        "eslint-plugin-prettier": "^4.2.1",
         "jest": "^29.5.0",
-        "prettier": "^2.8.5",
+        "rome": "^11.0.0",
         "ts-jest": "^29.0.5",
         "typescript": "^4.3.0"
     }
